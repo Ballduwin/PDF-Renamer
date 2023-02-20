@@ -1,30 +1,37 @@
-#from tika import parser   
-#parsed_pdf = parser.from_file(r"C:\testes\16.09.22 NFS-E 44606 - COPASTUR VIAGENS E TURISMO LTDA.pdf") 
-#data = parsed_pdf['content']
-from asyncore import read
 import os
+import PyPDF2
+import re
 
-path = "C:/Testes/"
-dirs = os.listdir(path)
+# Defina o caminho da pasta que contém os arquivos PDF
+pasta = r'C:\Users\Recepcao II\Documents\ALEX\PY\001'
 
-for index in range(len(dirs)):
-    arquivo = open(dirs[index], "r", encoding="utf-8")
-    arq = arquivo.read()
-    data_nota = arq[15 : 35]
-    n_nota = arq[35 : 55]
-    nome_nota = arq[85 : 105]
-    dadoscompletos = data_nota + " " + n_nota + " " + nome_nota
-    a = open("listanomes.txt", "w")
-    a = open("listanomes.txt", "a")
-    a.write(dadoscompletos)
-    a.close
+# Iterar sobre cada arquivo na pasta com a extensão .pdf
+for filename in os.listdir(pasta):
+    if filename.endswith('.pdf'):
+        # Abre o arquivo PDF
+        with open(os.path.join(pasta, filename), 'rb') as pdf_file:
+            # Criar um objeto PDF Reader
+            pdf_reader = PyPDF2.PdfReader(pdf_file)
 
-#data_nota = data[47 : 57]
-#n_nota = data[87 : 93]
-#nome_nota = data[698 : 730]
+            # Obter o número de páginas
+            num_pages = len(pdf_reader.pages)
 
+            # Iterar através de cada página
+            for page in range(num_pages):
+                # Obter o conteúdo de texto da página
+                page_text = pdf_reader.pages[page].extract_text()
 
-# ok abrir varios arquivos pdf
-# ok pegar as 3 informaçãoes data, nº da nota, nome em que está a nota
-# ok salva as informações em um arquivos txt
-# renomeia todos os arquivos na pasta usando o arquivo txt
+            a = page_text[16:26]
+                        
+            pdf_file.close()         
+            
+            x = a.split("/")
+            
+            print(x)
+        
+            #new_filename = re.sub("NFSe-\d{5}", "NFS-E ", filename)
+            #new_filename = re.sub("IM-13005057", ""+x[0]+"."+x[1]+"."+"23", filename)
+            new_filename = re.sub("NFSe-\d{5}|IM-13005057", lambda match: "NFS-E " if match.group().startswith("NFSe") else x[0]+"."+x[1]+"."+"23", filename)
+            os.rename(os.path.join(pasta, filename), os.path.join(pasta, new_filename))
+
+exit()
